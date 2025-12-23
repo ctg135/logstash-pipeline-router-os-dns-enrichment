@@ -1,0 +1,3 @@
+- pipeline.id: firewall
+  path.config: /usr/share/logstash/pipeline/firewall.conf
+  queue.type: persisted
