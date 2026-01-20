@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  jenkins:
+  jenkins-server:
     image: jenkins/jenkins:lts
     container_name: jenkins-server
     restart: unless-stopped
@@ -14,16 +14,18 @@ services:
       - jenkins-network
 
   jenkins-agent:
-    image: jenkins/inbound-agent
+    image: ctg135/jenkins-python:latest
     container_name: jenkins-agent
+    restart: unless-stopped
     environment:
       - JENKINS_URL=http://jenkins-server:8080
       - JENKINS_AGENT_NAME=agent
       - JENKINS_AGENT_WORKDIR=/home/jenkins/agent
+      - JENKINS_SECRET=a939b0cf188d2ef03551090145fbd4974e67dc3725d8475e0bdeb5677f053663
     volumes:
       - agent_workdir:/home/jenkins/agent
     depends_on:
-      - jenkins
+      - jenkins-server
     networks:
       - jenkins-network
 
