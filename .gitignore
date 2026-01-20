@@ -1,9 +1,11 @@
 
 # Python 
 .venv
+__pycache__/
 
 # Environment variables
 *.env
 .env
 
 portainer_data/
+
