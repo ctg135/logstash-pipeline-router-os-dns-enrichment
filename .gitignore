@@ -1,0 +1,9 @@
+
+# Python 
+.venv
+
+# Environment variables
+*.env
+.env
+
+portainer_data/

@@ -2,7 +2,7 @@ require 'dalli'
 
 def filter(event)
     cache = Dalli::Client.new('memcached:11211')
-	# Key is IP
+    # Key is IP
     key = event.get('[dns][resolved]')
     # Value is DNS
     value = event.get('[dns][query]')

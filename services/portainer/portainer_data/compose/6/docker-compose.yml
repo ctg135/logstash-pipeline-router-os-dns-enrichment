@@ -1,0 +1,68 @@
+services:
+
+  # Data + Master
+  opensearch-node1: 
+    image: opensearchproject/opensearch:latest # Specifying the latest available image - modify if you want a specific version
+    container_name: opensearch-node1
+    restart: unless-stopped
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node1
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true # Disable JVM heap memory swapping
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx6g" # Set min and max JVM heap sizes to at least 50% of system RAM
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data1:/usr/share/opensearch/data
+    ports:
+      - 9200:9200 # REST API
+      - 9600:9600 # Performance Analyzer
+    networks:
+      - opensearch-net
+
+  # Dashboards
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:latest 
+    container_name: opensearch-dashboards
+    restart: unless-stopped
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch-node1:9200"]'
+    networks:
+      - opensearch-net
+
+  # Logcollector
+  logstash:
+    image: opensearchproject/logstash-oss-with-opensearch-output-plugin:latest
+    container_name: logstash
+    restart: unless-stopped
+    ports:
+      - "6000:6000/udp" # Firewall events
+    volumes:
+      - /home/orahes/diplom/services/logstash/config:/usr/share/logstash/config # Mount custom configuration
+      - /home/orahes/diplom/services/logstash/pipeline:/usr/share/logstash/pipeline # Mount pipeline files
+      - /home/orahes/diplom/services/logstash/scripts:/usr/share/logstash/scripts # Mount scripts files
+    environment:
+      - LS_JAVA_OPTS=-Xms512m -Xmx2g
+
+  # For caching dns queries
+  memcached:
+    container_name: memcached
+    image: memcached:latest
+    restart: unless-stopped
+
+volumes:
+  opensearch-data1:
+
+networks:
+  opensearch-net:
